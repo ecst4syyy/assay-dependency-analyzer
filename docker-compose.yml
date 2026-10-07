@@ -1,0 +1,44 @@
+services:
+  db:
+    image: mysql:8.0
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_APP_USER: ${MYSQL_APP_USER}
+      MYSQL_APP_PASSWORD: ${MYSQL_APP_PASSWORD}
+      MYSQL_MIGRATE_USER: ${MYSQL_MIGRATE_USER}
+      MYSQL_MIGRATE_PASSWORD: ${MYSQL_MIGRATE_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./docker/mysql-init:/docker-entrypoint-initdb.d:ro
+    # No "ports:" — MySQL is reachable only on the internal compose network.
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      SECRET_KEY: ${SECRET_KEY}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      DATABASE_URL: mysql+pymysql://${MYSQL_APP_USER}:${MYSQL_APP_PASSWORD}@db:3306/${MYSQL_DATABASE}?charset=utf8mb4
+      MIGRATE_DATABASE_URL: mysql+pymysql://${MYSQL_MIGRATE_USER}:${MYSQL_MIGRATE_PASSWORD}@db:3306/${MYSQL_DATABASE}?charset=utf8mb4
+      REPO_URL: ${REPO_URL}
+      FORCE_HTTPS: ${FORCE_HTTPS:-false}
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-true}
+    ports:
+      - "127.0.0.1:5000:5000"
+    restart: unless-stopped
+
+volumes:
+  db_data:

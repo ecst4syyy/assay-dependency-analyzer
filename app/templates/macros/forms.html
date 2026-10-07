@@ -1,0 +1,6 @@
+{% macro field(f, hint=None) %}
+  {{ f.label }}
+  {{ f(**kwargs) }}
+  {% if hint %}<p class="hint">{{ hint }}</p>{% endif %}
+  {% for error in f.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+{% endmacro %}

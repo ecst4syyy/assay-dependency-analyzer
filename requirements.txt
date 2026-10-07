@@ -1,0 +1,25 @@
+# Runtime dependencies. Every version is pinned with ==.
+Flask==3.1.3
+Werkzeug==3.1.9
+Jinja2==3.1.6
+Flask-SQLAlchemy==3.1.1
+SQLAlchemy==2.1.3
+PyMySQL==1.2.3
+# Needed by PyMySQL for MySQL 8's default caching_sha2_password auth (DECISIONS D-02).
+cryptography==50.0.2
+Flask-Migrate==4.1.0
+alembic==1.20.0
+Flask-Login==0.6.3
+Flask-JWT-Extended==4.7.4
+PyJWT==2.15.1
+Flask-WTF==1.3.0
+WTForms==3.2.2
+Flask-Limiter==4.1.1
+flask-talisman==1.1.0
+argon2-cffi==25.1.0
+requests==2.34.2
+requests-cache==1.3.3
+RapidFuzz==3.14.6
+packaging==26.3
+# Production WSGI server (DECISIONS D-01).
+gunicorn==26.2.0

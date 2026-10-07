@@ -1,0 +1,29 @@
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# Runtime data
+instance/
+*.sqlite
+*.sqlite3
+http_cache*
+
+# OS / editors
+.DS_Store
+.vscode/
+.idea/
+
+# Private research data — hallucinated names must never be published (SPEC §14)
+data/private/
