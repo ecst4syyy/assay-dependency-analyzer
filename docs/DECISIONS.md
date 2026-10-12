@@ -116,3 +116,34 @@ find-and-replace.
 ## D-14 — `pip-audit` in requirements-dev.txt
 `pip-audit` is used for dependency auditing but is not in SPEC §5. It is a
 development tool only and is not installed in the image.
+
+## D-15 — Install commands only count where a command can start
+Early versions matched `pip install X` anywhere, so a chat answer ending with
+"then pip install the remaining packages" produced packages called `the` and
+`remaining`. Now the command has to start a line, or come after a backtick,
+`$`, `!`, `%`, `&&`, `;`, `||` or a Dockerfile `RUN`. That still catches every
+command I could find in real assistant output, since they're nearly always in
+code blocks or inline code.
+**Trade-off:** a command written mid-sentence without backticks is missed.
+That seemed better than inventing package names out of English.
+
+## D-16 — Namespace packages mapped from the dotted import path
+Mapping `from google.cloud import storage` by its top-level name gives
+`google`, which is a real but unrelated PyPI package, so it would come back
+SAFE. For `google`, `google.cloud`, `azure` and a few sub-namespaces the parser
+looks at what is imported (`google-cloud-storage`), and `data/aliases.json` has a
+small `pypi_dotted` table for cases like `google.protobuf` → `protobuf`.
+**Alternative:** ignore namespace imports entirely. Rejected because the
+google-cloud packages are exactly what assistants suggest most.
+
+## D-17 — Local modules in pasted code are not filtered
+`from utils import helper` could be the user's own file or the `utils`
+package on PyPI, and the pasted text alone can't tell them apart. The parser
+reports it, and the user can allow-list it. This is listed as a limitation and
+should show up in the evaluation as a source of false positives.
+
+## D-18 — Arguments per install command capped at 2,000 characters
+`shlex` is pure Python and handles input one character at a time, so one
+pathological 256 KB "command" took about a second. No real install line is
+anywhere near 2,000 characters. With the cap, the worst input in the test
+suite parses in about 0.1 s.

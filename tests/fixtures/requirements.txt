@@ -1,0 +1,14 @@
+# Production
+Flask==3.0.3
+flask_sqlalchemy>=3.1
+requests[socks]==2.32.3 --hash=sha256:70761cfe03c773ceb22aa2f671b4757976145175cdfca038c02654d061d6dcc6
+pywin32==306; sys_platform == "win32"
+python-dateutil \
+    ==2.9.0
+
+-r dev-requirements.txt
+-e git+https://github.com/example/thing.git#egg=thing
+--index-url https://pypi.org/simple
+./local_pkg
+https://example.com/pkg-1.0.tar.gz
+Django   # trailing comment

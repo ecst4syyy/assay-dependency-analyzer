@@ -46,3 +46,44 @@ Dated entries per slice: what was built, what was decided, what was deferred.
 - **Decided:** D-03 (no email-validator), D-12 (Secure cookies on localhost).
 - **Deferred:** R-01, server-side session invalidation on logout (see
   threat-model.md).
+
+## 2026-10-12 — Slice 3: Input parser
+- **Built:** `app/services/parser.py`. It handles pasted text, uploads and
+  single-package lookups.
+  - Install commands: pip, pip3, `python -m pip`, uv, poetry, pdm, pipenv,
+    npm, yarn, pnpm and bun.
+  - Code: Python `import`/`from`; JS `require`, `import ... from`, bare and
+    dynamic `import()`.
+  - Files: requirements.txt (continuations, comments, markers, `--hash`,
+    options) and package.json (`dependencies` and `devDependencies`).
+  - Names are PEP 503-normalised. Standard-library and Node built-in modules
+    are dropped, and relative imports are skipped.
+  - Exact versions are kept (`==` for PyPI, plain semver for npm) so later
+    slices can query OSV for a specific release. Ranges become "no version".
+  - Results are capped at 200 packages. The parser also reports how many
+    entries it rejected and whether it truncated, so the UI can say so.
+- **Uploads:** only `.txt` and `.json`, at most 256 KB. Binary content (NUL
+  bytes) and non-UTF-8 files are refused, and the content decides the format:
+  a `.txt` containing JSON is read as package.json.
+  JSON nesting is checked before `json.loads`, so deep nesting can't crash it.
+- **Name safety:** the SPEC regex, plus a leading letter or digit (so `..`,
+  `.env` and `-rf` are rejected) and scoped npm names (D-09). Paths, URLs,
+  `git+`, `file:` and archives are rejected and counted.
+- **Bugs found while testing:**
+  - prose produced fake packages (D-15);
+  - `google.cloud` imports mapped to the wrong package (D-16);
+  - `"lodash": "~4.17.21"` in package.json was rejected because `~` looked
+    like a home directory;
+  - one huge command line took a second to parse (D-18).
+- **Alias table:** `data/aliases.json` has the 13 SPEC import aliases plus 22
+  more and the dotted namespace table.
+- **Tests:** `tests/unit/test_parser.py` has 132 cases, including:
+  - 48 paste fixtures, plus a realistic chat answer, a requirements.txt and a
+    package.json in `tests/fixtures/`;
+  - upload rejections and 22 hostile names (path traversal, `@evil.com`,
+    CRLF injection, a Unicode homoglyph, 215-character names);
+  - timing tests on pathological input.
+
+  The full suite is at 165 passing, offline.
+- **Deferred:** local-module false positives (D-17). Nothing calls the parser
+  yet; the scan form wires it up in Slice 7.

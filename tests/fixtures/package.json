@@ -1,0 +1,16 @@
+{
+  "name": "demo-app",
+  "version": "1.0.0",
+  "scripts": { "start": "node index.js" },
+  "dependencies": {
+    "express": "4.19.2",
+    "@types/node": "^20.11.0",
+    "lodash": "~4.17.21",
+    "local-lib": "file:../local-lib",
+    "from-github": "git+https://github.com/example/repo.git"
+  },
+  "devDependencies": {
+    "jest": "29.7.0",
+    "Express": "4.19.2"
+  }
+}
